@@ -57,17 +57,25 @@ export function setupCounter(element) {
     if (y + dx < ballRadius) {
       dy = -dy;
     }
-    // TEMPORAL GAME OVER
-    if (y + dy <= canvas.height) {
+
+    // toca pala o toca suelo
+
+    const isBallSameXAsPaddle = x > paddleX && x < paddleX + paddleWith;
+    const isBallTouchinPaddle = y + dy > paddleY
+
+    if (isBallTouchinPaddle && isBallSameXAsPaddle) {
+      dy = -dy
+    }
+    else if (y + dy <= canvas.height) {
       document.location.reload();
     }
     x += dx;
     y += dy;
   }
   function paddleMovent(params) {
-    if (rightPressed) {
+    if (rightPressed && paddleX < canvas.width - paddleWith) {
       paddleX += 7
-    } else if (leftPressed) {
+    } else if (leftPressed && paddleX > 0) {
       paddleX += -7
     }
   }
