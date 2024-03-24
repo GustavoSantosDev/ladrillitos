@@ -1,5 +1,6 @@
 export function setupCounter(element) {
   // TG
+
   const canvas = document.querySelector("canvas");
   const ctx = canvas.getContext("2d");
 
@@ -28,6 +29,45 @@ export function setupCounter(element) {
   let rightPressed = false
   let leftPressed = false
 
+  //variables de sprites
+
+  const $sprite = document.querySelector('#sprite')
+  const $bricks = document.querySelector('#bricks')
+
+  //variables de los bricks
+  const brickRowCount = 6;
+  const brickColumnCount = 13;
+  const brickWidth = 32;
+  const brickHeigth = 16;
+  const brickPadding = 0;
+  const brickOffsetTop = 80;
+  const brickOffsetLeft = 16;
+  const bricks = [];
+
+  const BRICH_STATUS = {
+    ACTIVE: 1,
+    DESTROYED: 0
+  }
+
+  for (let c = 0; c < brickColumnCount; c++) {
+    bricks[c] = []
+    for (let r = 0; r < brickRowCount; r++) {
+      //calculo para la posicion de los ladrillos en la pantalla
+      const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft
+      const brickY = r * (brickHeigth + brickPadding) + brickOffsetTop
+      //asignar colores a los ladrillos aleatoriamente
+      const random = Math.floor(Math.random() * 8);
+      //Se guarda la informacion de cada ladrillo
+      bricks[c][r] = {
+        x: brickX,
+        y: brickY,
+        status: BRICH_STATUS.ACTIVE,
+        color: random
+      }
+    }
+  }
+
+
 
   function drawBall(params) {
     ctx.beginPath();
@@ -37,17 +77,61 @@ export function setupCounter(element) {
     ctx.closePath();
   }
   function drawPaddle(params) {
-    ctx.fillStyle = '#09f'
-    ctx.fillRect(
+    ctx.drawImage(
+      $sprite,
+      29,
+      174,
+      paddleWith,
+      paddleHeight,
       paddleX,
       paddleY,
       paddleWith,
       paddleHeight
     )
-
   }
-  function drawBricks(params) { }
-  function collisionsDetection(params) { }
+  function drawBricks(params) {
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        const currentBrick = bricks[c][r]
+        if (currentBrick.status === BRICH_STATUS.DESTROYED) continue;
+
+        const clipX = currentBrick.color * 32
+
+        ctx.drawImage(
+          $bricks,
+          clipX,
+          0,
+          brickWidth,
+          brickHeigth,
+          currentBrick.x,
+          currentBrick.y,
+          brickWidth,
+          brickHeigth
+        )
+      }
+    }
+  }
+  function collisionsDetection(params) {
+    for (let c = 0; c < brickColumnCount; c++) {
+      for (let r = 0; r < brickRowCount; r++) {
+        const currentBrick = bricks[c][r]
+        if (currentBrick.status === BRICH_STATUS.DESTROYED) continue;
+
+        const isBallSameXAsBrick =
+          x > currentBrick.x &&
+          x < currentBrick.x + brickWidth
+
+        const isBallSameYAsBrick =
+          y > currentBrick.y &&
+          y < currentBrick.y + brickHeigth
+
+        if (isBallSameXAsBrick && isBallSameYAsBrick) {
+          dy = -dy
+          currentBrick.status = BRICH_STATUS.DESTROYED
+        }
+      }
+    }
+  }
   function ballMovent(params) {
     //right wall and Left
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
